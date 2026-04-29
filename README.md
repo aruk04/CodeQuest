@@ -5,7 +5,7 @@ An AI-powered coding learning platform with adaptive lessons, live code executio
 ## Tech Stack
 - **Frontend**: React + Vite + Tailwind CSS + Framer Motion + Monaco Editor
 - **Backend**: FastAPI (Python) + SQLAlchemy async + PostgreSQL + Redis
-- **AI**: OpenAI GPT-4o (roadmap generation, adaptive lessons, hints, debugging)
+- **AI**: OpenAI Claude (roadmap generation, adaptive lessons, hints, debugging)
 - **Code Execution**: Judge0 CE (Self-hosted via Docker)
 - **Auth**: JWT (email + password)
 
