@@ -47,6 +47,13 @@ class ChatRequest(BaseModel):
     context: Optional[str] = None
 
 
+class MascotFeedbackRequest(BaseModel):
+    code: str
+    language: str
+    question: Optional[str] = None
+    solved: bool = False
+
+
 @router.post("/explain")
 async def explain_concept(
     data: ExplainRequest,
@@ -58,6 +65,20 @@ async def explain_concept(
         skill_level=data.skill_level,
     )
     return {"explanation": explanation}
+
+
+@router.post("/mascot-feedback")
+async def get_mascot_feedback(
+    data: MascotFeedbackRequest,
+    current_user: User = Depends(get_current_user),
+):
+    feedback = await ai_service.get_mascot_feedback(
+        code=data.code,
+        language=data.language,
+        question=data.question,
+        solved=data.solved,
+    )
+    return feedback
 
 
 @router.post("/hint")

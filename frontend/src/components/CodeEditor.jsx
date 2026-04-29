@@ -114,6 +114,17 @@ export default function CodeEditor({ language = 'python', initialCode = '', onCo
         </div>
 
         <div className="flex items-center gap-2">
+          {user?.profile?.bonus_hints > 0 && (
+            <motion.div 
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="flex items-center gap-1.5 px-2 py-1 bg-brand-500/10 border border-brand-500/20 rounded-lg mr-2"
+            >
+              <Sparkles className="w-3 h-3 text-brand-400" />
+              <span className="text-[10px] font-bold text-brand-300">{user.profile.bonus_hints} Bonus</span>
+            </motion.div>
+          )}
+
           <div className="flex items-center gap-1.5 mr-2">
             <Palette className="w-3.5 h-3.5 text-slate-400" />
             <select 
@@ -140,20 +151,32 @@ export default function CodeEditor({ language = 'python', initialCode = '', onCo
             const bonus = user?.profile?.bonus_hints || 0
             const freeLeft = Math.max(0, 3 - used)
             
-            let badgeText = `${freeLeft}/3 Free`
+            // Logic: Use free ones first. 
+            // Button badge shows what is being used NEXT.
+            let badgeText = `${freeLeft} Free`
+            let badgeColor = 'bg-brand-500/20 text-brand-400'
+
             if (freeLeft === 0) {
-              badgeText = bonus > 0 ? `${bonus} Bonus` : '0 Left'
+              if (bonus > 0) {
+                badgeText = `${bonus} Bonus`
+                badgeColor = 'bg-amber-400/20 text-amber-400'
+              } else {
+                badgeText = '0 Left'
+                badgeColor = 'bg-red-500/20 text-red-400'
+              }
             }
 
             return (
               <button
                 onClick={handleDebug}
-                disabled={isDebugging}
-                className="btn-ghost text-xs px-2.5 py-1.5 flex items-center gap-1 text-amber-400 border-amber-500/30 hover:bg-amber-500/10"
-                title="Use AI to debug your code"
+                disabled={isDebugging || (freeLeft === 0 && bonus === 0)}
+                className={`btn-ghost text-xs px-2.5 py-1.5 flex items-center gap-1 transition-all ${
+                  freeLeft > 0 ? 'text-brand-400 border-brand-500/20' : 'text-amber-400 border-amber-500/20'
+                }`}
+                title={freeLeft > 0 ? "Use a free daily hint" : bonus > 0 ? "Use a bonus hint" : "No hints left today"}
               >
                 {isDebugging ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Bug className="w-3.5 h-3.5" />}
-                Debug <span className="text-[10px] bg-amber-400/20 px-1.5 py-0.5 rounded ml-1">{badgeText}</span>
+                Debug <span className={`text-[10px] px-1.5 py-0.5 rounded ml-1 ${badgeColor}`}>{badgeText}</span>
               </button>
             )
           })()}

@@ -1,12 +1,15 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Layers, AlignJustify, GripHorizontal, Plus, Minus, ArrowRight, Info } from 'lucide-react'
+import { Layers, AlignJustify, GripHorizontal, Plus, Minus, ArrowRight, Info, Share2, GitBranch, Table, Trash2, Search } from 'lucide-react'
 
 // Basic DSA structures we will visualize
 const STRUCTURES = [
   { id: 'stack', name: 'Stack', icon: Layers, desc: 'LIFO (Last In, First Out). Like a stack of plates.' },
   { id: 'queue', name: 'Queue', icon: AlignJustify, desc: 'FIFO (First In, First Out). Like a line at a store.' },
-  { id: 'array', name: 'Array', icon: GripHorizontal, desc: 'Contiguous memory blocks. Random access in O(1).' }
+  { id: 'array', name: 'Array', icon: GripHorizontal, desc: 'Contiguous memory blocks. Random access in O(1).' },
+  { id: 'linkedlist', name: 'Linked List', icon: Share2, desc: 'Nodes connected by pointers. Easy insertion/deletion.' },
+  { id: 'binarytree', name: 'Binary Tree', icon: GitBranch, desc: 'Hierarchical structure where each node has max 2 children.' },
+  { id: 'hashtable', name: 'Hash Table', icon: Table, desc: 'Key-value pairs using a hash function for O(1) average access.' }
 ]
 
 function StackVisualizer() {
@@ -166,19 +169,75 @@ function QueueVisualizer() {
 }
 
 function ArrayVisualizer() {
-  const [array, setArray] = useState([10, 20, 30, 40, 50])
+  const [array, setArray] = useState([40, 10, 50, 20, 30])
   const [counter, setCounter] = useState(60)
   const [activeIndex, setActiveIndex] = useState(null)
+  const [comparing, setComparing] = useState([])
+  const [sorting, setSorting] = useState(false)
+  const [searchingValue, setSearchingValue] = useState('')
+  const [foundIndex, setFoundIndex] = useState(null)
   
+  const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
+
   const insert = () => {
-    if (array.length >= 10) return
-    setArray(prev => [...prev, counter])
-    setCounter(c => c + 10)
+    if (array.length >= 10 || sorting) return
+    setArray(prev => [...prev, Math.floor(Math.random() * 90) + 10])
+    setFoundIndex(null)
   }
   
-  const remove = () => {
-    if (array.length === 0) return
-    setArray(prev => prev.slice(0, -1))
+  const removeAt = (index) => {
+    if (sorting) return
+    setArray(prev => prev.filter((_, i) => i !== index))
+    setFoundIndex(null)
+  }
+
+  const handleSearch = () => {
+    const val = parseInt(searchingValue)
+    const idx = array.indexOf(val)
+    setFoundIndex(idx !== -1 ? idx : -2)
+    setTimeout(() => setFoundIndex(null), 2000)
+  }
+
+  const bubbleSort = async () => {
+    setSorting(true)
+    let arr = [...array]
+    for (let i = 0; i < arr.length; i++) {
+      for (let j = 0; j < arr.length - i - 1; j++) {
+        setComparing([j, j + 1])
+        await sleep(600)
+        if (arr[j] > arr[j + 1]) {
+          [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]]
+          setArray([...arr])
+          await sleep(600)
+        }
+      }
+    }
+    setComparing([])
+    setSorting(false)
+    toast.success('Array Sorted!')
+  }
+
+  const selectionSort = async () => {
+    setSorting(true)
+    let arr = [...array]
+    for (let i = 0; i < arr.length; i++) {
+      let minIdx = i
+      for (let j = i + 1; j < arr.length; j++) {
+        setComparing([i, j])
+        await sleep(400)
+        if (arr[j] < arr[minIdx]) {
+          minIdx = j
+        }
+      }
+      if (minIdx !== i) {
+        [arr[i], arr[minIdx]] = [arr[minIdx], arr[i]]
+        setArray([...arr])
+        await sleep(600)
+      }
+    }
+    setComparing([])
+    setSorting(false)
+    toast.success('Array Sorted!')
   }
 
   return (
@@ -186,56 +245,294 @@ function ArrayVisualizer() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h2 className="text-xl font-bold text-white mb-1">Array</h2>
-          <p className="text-sm text-slate-400">Contiguous memory allocation.</p>
+          <p className="text-sm text-slate-400">Sorting & Interactive Manipulation.</p>
         </div>
         <div className="flex gap-2">
-          <button onClick={insert} disabled={array.length >= 10} className="btn-primary flex items-center gap-2">
-            <Plus className="w-4 h-4" /> Append
-          </button>
-          <button onClick={remove} disabled={array.length === 0} className="btn-ghost flex items-center gap-2 text-red-400 hover:bg-red-500/10 border border-red-500/30">
-            <Minus className="w-4 h-4" /> Remove Last
-          </button>
+          {!sorting && (
+            <>
+              <div className="flex bg-surface-900 rounded-lg overflow-hidden border border-white/10 mr-2">
+                <input 
+                  type="number" 
+                  placeholder="Val"
+                  className="w-12 bg-transparent px-2 text-xs text-white outline-none"
+                  value={searchingValue}
+                  onChange={e => setSearchingValue(e.target.value)}
+                />
+                <button onClick={handleSearch} className="p-2 hover:bg-white/5 text-purple-400 transition-colors">
+                  <Search className="w-4 h-4" />
+                </button>
+              </div>
+              <button onClick={bubbleSort} className="btn-ghost text-xs border border-brand-500/30 text-brand-400 hover:bg-brand-500/10">
+                Bubble Sort
+              </button>
+              <button onClick={selectionSort} className="btn-ghost text-xs border border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/10">
+                Selection Sort
+              </button>
+              <button onClick={insert} disabled={array.length >= 10} className="btn-primary flex items-center gap-2 text-xs">
+                <Plus className="w-3 h-3" /> Append
+              </button>
+            </>
+          )}
+          {sorting && (
+            <div className="flex items-center gap-2 text-brand-400 animate-pulse text-sm font-bold">
+              Sorting in progress...
+            </div>
+          )}
         </div>
       </div>
 
       <div className="flex-1 flex items-center justify-center py-10 overflow-hidden">
-        <div className="flex flex-wrap gap-2 justify-center max-w-2xl px-4">
+        <div className="flex items-end gap-2 justify-center h-48 px-4">
           <AnimatePresence>
-            {array.map((item, i) => (
-              <motion.div
-                key={`${item}`}
-                layout
-                initial={{ opacity: 0, scale: 0.5 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.5 }}
-                whileHover={{ y: -5 }}
-                onHoverStart={() => setActiveIndex(i)}
-                onHoverEnd={() => setActiveIndex(null)}
-                className={`w-14 h-14 rounded flex flex-col items-center justify-center font-mono font-bold transition-colors cursor-pointer border relative ${
-                  activeIndex === i 
-                    ? 'bg-purple-500/20 border-purple-400 text-purple-300' 
-                    : 'bg-surface-700 border-surface-600 text-white'
-                }`}
-              >
-                <span className="text-[10px] text-slate-500 absolute top-1 font-sans">{i}</span>
-                <span className="mt-2">{item}</span>
-              </motion.div>
-            ))}
+            {array.map((item, i) => {
+              const isComparing = comparing.includes(i)
+              const isFound = foundIndex === i
+              return (
+                <motion.div
+                  key={`${item}-${i}`}
+                  layout
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  animate={{ 
+                    opacity: 1, 
+                    scale: 1,
+                    height: `${(item / 100) * 160 + 40}px`,
+                    backgroundColor: isFound ? '#22c55e' : isComparing ? '#a855f7' : '#1e293b',
+                    borderColor: isFound ? '#22c55e' : isComparing ? '#a855f7' : '#334155'
+                  }}
+                  exit={{ opacity: 0, scale: 0.5 }}
+                  className="w-12 rounded-t-lg flex flex-col items-center justify-end pb-3 font-mono font-bold transition-all border relative shadow-xl overflow-hidden group cursor-pointer"
+                >
+                  <span className="text-[10px] text-white/80">{item}</span>
+                  {!sorting && (
+                    <button 
+                      onClick={() => removeAt(i)}
+                      className="absolute inset-0 bg-red-500/80 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                </motion.div>
+              )
+            })}
           </AnimatePresence>
-          {array.length === 0 && (
-            <div className="text-slate-500 italic text-sm w-full text-center py-8">
-              Array is empty
-            </div>
-          )}
         </div>
       </div>
       
       <div className="mt-auto bg-surface-700/50 p-4 rounded-xl border border-white/5 flex gap-4 items-start">
         <Info className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
         <div className="text-sm text-slate-300">
-          <strong className="text-white block mb-1">Time Complexity:</strong>
-          Access: <code className="text-purple-400">O(1)</code> | Search: <code className="text-purple-400">O(N)</code> | Insertion (end): <code className="text-purple-400">O(1)</code>
-          <p className="mt-2 text-slate-400">Common uses: Storing sequential data, implementing other data structures (Hash Tables, Heaps).</p>
+          <strong className="text-white block mb-1 text-xs uppercase tracking-wider opacity-60">Visual sorting</strong>
+          Average: <code className="text-brand-400">O(N²)</code> | Space: <code className="text-brand-400">O(1)</code>
+          <p className="mt-2 text-slate-400">Watch the elements swap in real-time. Highlights indicate comparisons.</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function LinkedListVisualizer() {
+  const [nodes, setNodes] = useState([10, 20, 30])
+  const [counter, setCounter] = useState(40)
+
+  const addNode = () => {
+    if (nodes.length >= 6) return
+    setNodes(prev => [...prev, counter])
+    setCounter(c => c + 10)
+  }
+
+  const removeNode = (idx) => {
+    setNodes(prev => prev.filter((_, i) => i !== idx))
+  }
+
+  return (
+    <div className="flex flex-col h-full">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h2 className="text-xl font-bold text-white mb-1">Singly Linked List</h2>
+          <p className="text-sm text-slate-400">Nodes connected by pointers.</p>
+        </div>
+        <button onClick={addNode} disabled={nodes.length >= 6} className="btn-primary flex items-center gap-2">
+          <Plus className="w-4 h-4" /> Add Node
+        </button>
+      </div>
+
+      <div className="flex-1 flex items-center justify-center py-10 overflow-x-auto custom-scrollbar">
+        <div className="flex items-center gap-0 min-w-max px-8">
+          <AnimatePresence>
+            {nodes.map((node, i) => (
+              <React.Fragment key={`${node}`}>
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.5, x: -20 }}
+                  animate={{ opacity: 1, scale: 1, x: 0 }}
+                  exit={{ opacity: 0, scale: 0, x: 20 }}
+                  className="relative group"
+                >
+                  <div className="w-16 h-16 bg-gradient-to-br from-teal-500 to-emerald-600 rounded-lg flex flex-col items-center justify-center font-mono font-bold text-white shadow-xl border border-teal-400/30 relative">
+                    {node}
+                    <div className="absolute -bottom-6 text-[10px] text-teal-400/60 font-semibold">
+                      {i === 0 ? 'Head' : i === nodes.length - 1 ? 'Tail' : `Node ${i}`}
+                    </div>
+                    <button 
+                      onClick={() => removeNode(i)}
+                      className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                    >
+                      <Trash2 className="w-3 h-3 text-white" />
+                    </button>
+                  </div>
+                </motion.div>
+                
+                {i < nodes.length - 1 && (
+                  <motion.div 
+                    initial={{ width: 0 }} 
+                    animate={{ width: 40 }} 
+                    className="h-1 bg-teal-500/30 relative flex items-center justify-center overflow-visible"
+                  >
+                    <ArrowRight className="w-4 h-4 text-teal-500 absolute -right-2" />
+                  </motion.div>
+                )}
+
+                {i === nodes.length - 1 && (
+                   <motion.div 
+                   initial={{ width: 0 }} 
+                   animate={{ width: 40 }} 
+                   className="h-1 bg-slate-700 relative flex items-center justify-center"
+                 >
+                   <div className="absolute -right-2 w-2 h-2 rounded-full bg-slate-500" title="Null Pointer" />
+                 </motion.div>
+                )}
+              </React.Fragment>
+            ))}
+          </AnimatePresence>
+          {nodes.length === 0 && (
+            <div className="text-slate-500 italic text-sm">List is empty. Add a Head node.</div>
+          )}
+        </div>
+      </div>
+
+      <div className="mt-auto bg-surface-700/50 p-4 rounded-xl border border-white/5 flex gap-4 items-start">
+        <Share2 className="w-5 h-5 text-teal-400 flex-shrink-0 mt-0.5" />
+        <div className="text-sm text-slate-300">
+          <strong className="text-white block mb-1">Complexity:</strong>
+          Insert (Head): <code className="text-teal-400">O(1)</code> | Search: <code className="text-teal-400">O(N)</code>
+          <p className="mt-2 text-slate-400">Linked lists are dynamic and can easily grow in size without reallocation.</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function BinaryTreeVisualizer() {
+  const [tree, setTree] = useState({
+    val: 50,
+    left: { val: 30, left: { val: 20 }, right: { val: 40 } },
+    right: { val: 70, left: { val: 60 }, right: { val: 80 } }
+  })
+
+  const TreeNode = ({ node, level = 0 }) => {
+    if (!node) return null
+    return (
+      <div className="flex flex-col items-center">
+        <motion.div 
+          initial={{ scale: 0 }} 
+          animate={{ scale: 1 }}
+          className="w-12 h-12 rounded-full bg-indigo-600 border-2 border-indigo-400 flex items-center justify-center text-white font-bold text-sm shadow-lg mb-2 z-10"
+        >
+          {node.val}
+        </motion.div>
+        <div className="flex gap-4 md:gap-8 relative">
+          {node.left && (
+            <div className="relative">
+              <div className="absolute top-[-10px] right-[-10px] w-10 h-10 border-t-2 border-l-2 border-indigo-500/30 -rotate-45" />
+              <TreeNode node={node.left} level={level + 1} />
+            </div>
+          )}
+          {node.right && (
+            <div className="relative">
+              <div className="absolute top-[-10px] left-[-10px] w-10 h-10 border-t-2 border-r-2 border-indigo-500/30 rotate-45" />
+              <TreeNode node={node.right} level={level + 1} />
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex flex-col h-full">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h2 className="text-xl font-bold text-white mb-1">Binary Search Tree</h2>
+          <p className="text-sm text-slate-400">Hierarchical data structure.</p>
+        </div>
+      </div>
+
+      <div className="flex-1 flex items-start justify-center pt-8 overflow-auto custom-scrollbar">
+        <TreeNode node={tree} />
+      </div>
+
+      <div className="mt-auto bg-surface-700/50 p-4 rounded-xl border border-white/5 flex gap-4 items-start">
+        <GitBranch className="w-5 h-5 text-indigo-400 flex-shrink-0 mt-0.5" />
+        <div className="text-sm text-slate-300">
+          <strong className="text-white block mb-1">Complexity:</strong>
+          Search (Balanced): <code className="text-indigo-400">O(log N)</code> | Insertion: <code className="text-indigo-400">O(log N)</code>
+          <p className="mt-2 text-slate-400">BSTs allow for fast lookup, addition and removal of items.</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function HashTableVisualizer() {
+  const [buckets, setBuckets] = useState([
+    { key: 'name', val: 'Alice' },
+    null,
+    { key: 'city', val: 'NY' },
+    null,
+    { key: 'role', val: 'Admin' },
+    null,
+    null,
+    { key: 'age', val: '25' }
+  ])
+
+  return (
+    <div className="flex flex-col h-full">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h2 className="text-xl font-bold text-white mb-1">Hash Table</h2>
+          <p className="text-sm text-slate-400">Key-Value mapping using a Hash Function.</p>
+        </div>
+      </div>
+
+      <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4 p-4 items-center justify-center">
+        {buckets.map((b, i) => (
+          <motion.div
+            key={i}
+            whileHover={{ scale: 1.05 }}
+            className={`h-24 rounded-xl border-2 flex flex-col items-center justify-center p-2 relative overflow-hidden transition-all ${
+              b 
+                ? 'bg-orange-500/10 border-orange-500/50 text-orange-200' 
+                : 'bg-surface-900/50 border-white/5 text-slate-600'
+            }`}
+          >
+            <span className="absolute top-1 left-2 text-[10px] font-mono opacity-50">[{i}]</span>
+            {b ? (
+              <>
+                <span className="text-[10px] uppercase font-bold text-orange-500/70">{b.key}</span>
+                <span className="font-mono text-sm">{b.val}</span>
+              </>
+            ) : (
+              <span className="text-xs italic">Empty</span>
+            )}
+          </motion.div>
+        ))}
+      </div>
+
+      <div className="mt-auto bg-surface-700/50 p-4 rounded-xl border border-white/5 flex gap-4 items-start">
+        <Table className="w-5 h-5 text-orange-400 flex-shrink-0 mt-0.5" />
+        <div className="text-sm text-slate-300">
+          <strong className="text-white block mb-1">Complexity:</strong>
+          Access/Insert: <code className="text-orange-400">O(1) Avg</code> | Collision: <code className="text-orange-400">O(N) Worst</code>
+          <p className="mt-2 text-slate-400">Hash tables use a hash function to compute an index into an array of buckets.</p>
         </div>
       </div>
     </div>
@@ -284,6 +581,9 @@ export default function Visualize() {
           {activeTab === 'stack' && <StackVisualizer />}
           {activeTab === 'queue' && <QueueVisualizer />}
           {activeTab === 'array' && <ArrayVisualizer />}
+          {activeTab === 'linkedlist' && <LinkedListVisualizer />}
+          {activeTab === 'binarytree' && <BinaryTreeVisualizer />}
+          {activeTab === 'hashtable' && <HashTableVisualizer />}
         </div>
       </div>
     </motion.div>

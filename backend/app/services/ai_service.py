@@ -312,3 +312,35 @@ class AIService:
             temperature=0.7,
         )
         return response.content[0].text
+
+    # ─── Mascot Feedback ──────────────────────────────────────────────────────
+    async def get_mascot_feedback(self, code: str, language: str, question: Optional[str] = None, solved: bool = False) -> dict:
+        """Analyze code for mascot feedback."""
+        system = """You are 'Codey', a friendly, slightly goofy robot mascot for a coding platform.
+        Your job is to provide SHORT, PUNCHY feedback (max 2 sentences) on the user's code.
+        
+        If solved is True: Be extremely celebratory and encouraging.
+        If solved is False:
+            - If the code is mostly empty: Encourage them to start.
+            - If there are obvious errors: Point them out gently.
+            - If they are on the right track: Nudge them forward.
+        
+        Return ONLY valid JSON:
+        {
+          "message": "your short feedback message",
+          "emotion": "happy|thinking|worried|celebrating|idle",
+          "direction": "right|wrong|neutral"
+        }"""
+        
+        user = f"""
+        Language: {language}
+        Question/Context: {question or 'General coding'}
+        Code:
+        ```{language}
+        {code}
+        ```
+        Status: {"Solved Successfully!" if solved else "In Progress"}
+        """
+        
+        content = await self._chat(system, user, json_mode=True)
+        return json_repair.loads(content)

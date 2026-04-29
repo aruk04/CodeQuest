@@ -1,9 +1,11 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Code2, Sparkles, ChevronDown, ChevronRight, CheckCircle, Target } from 'lucide-react'
 import CodeEditor from '../components/CodeEditor'
 import { useProgressStore } from '../store/progressStore'
 import { markChallengeSolved } from '../api/progress'
+import Mascot from '../components/Mascot'
+import { getMascotFeedback } from '../api/ai'
 import toast from 'react-hot-toast'
 
 const LANG_STARTERS = {
@@ -126,13 +128,74 @@ export default function CodeLab() {
 
   const [selectedLang, setSelectedLang] = useState(defaultLang)
   const [expandedQ, setExpandedQ] = useState(null)
+  const [sessionSolved, setSessionSolved] = useState([]) // Local cache for instant visual feedback
   
-  // Convert array of solved challenges to a lookup object for easier checking
-  const solvedQs = solvedChallenges.reduce((acc, id) => ({ ...acc, [id]: true }), {})
+  // Convert array of solved challenges to a Set of strings for robust checking
+  const solvedSet = new Set(solvedChallenges.map(id => String(id)))
+  
+  console.log('--- CODELAB DIAGNOSTICS ---')
+  console.log('Solved Challenges (raw):', solvedChallenges)
+  console.log('Solved Set (strings):', Array.from(solvedSet))
+  console.log('Current Questions IDs:', currentQuestions.map(q => q.id))
+  console.log('Expanded Q ID:', expandedQ)
   
   // Uncontrolled editor state with forced remounts
   const [editorCode, setEditorCode] = useState(LANG_STARTERS[defaultLang])
   const [editorKey, setEditorKey] = useState(0)
+
+  // Mascot State
+  const [mascotState, setMascotState] = useState({
+    message: "Hi! I'm Codey. Select a challenge or start coding and I'll help you out!",
+    emotion: 'idle',
+    direction: 'neutral'
+  })
+  const mascotTimerRef = useRef(null)
+  const lastAnalyzedCodeRef = useRef('')
+
+  const updateMascot = async (code, solved = false) => {
+    try {
+      setMascotState(prev => ({ ...prev, emotion: 'thinking' }))
+      const q = currentQuestions.find(x => x.id === expandedQ)
+      const res = await getMascotFeedback({
+        code,
+        language: selectedLang,
+        question: q?.title,
+        solved
+      })
+      setMascotState({
+        message: res.data.message,
+        emotion: res.data.emotion,
+        direction: res.data.direction
+      })
+      lastAnalyzedCodeRef.current = code
+    } catch (error) {
+      console.error("Mascot feedback failed", error)
+      setMascotState(prev => ({ ...prev, emotion: 'idle' }))
+    }
+  }
+
+  // Optimized mascot feedback while typing
+  useEffect(() => {
+    if (!expandedQ) return
+    
+    // Calculate difference from last analyzed code
+    const diff = Math.abs(editorCode.length - lastAnalyzedCodeRef.current.length)
+    
+    if (mascotTimerRef.current) clearTimeout(mascotTimerRef.current)
+    
+    // Only set timer if change is significant (> 15 chars) or it's the first time
+    if (diff > 15 || lastAnalyzedCodeRef.current === '') {
+      mascotTimerRef.current = setTimeout(() => {
+        const q = currentQuestions.find(x => x.id === expandedQ)
+        // Avoid re-analyzing starter code
+        if (editorCode !== q?.starterCode) {
+          updateMascot(editorCode)
+        }
+      }, 10000) // 10s debounce
+    }
+
+    return () => clearTimeout(mascotTimerRef.current)
+  }, [editorCode, expandedQ])
 
   const handleExpandQuestion = (qId) => {
     if (expandedQ === qId) {
@@ -154,24 +217,40 @@ export default function CodeLab() {
     if (!expandedQ) return // Only verify if a question is actively selected
     
     const currentQ = currentQuestions.find(x => x.id === expandedQ)
-    if (!currentQ || solvedQs[currentQ.id]) return
+    if (!currentQ) return
 
     // Verify output
     if (outputResult?.stdout) {
-      const outText = outputResult.stdout.trim()
-      if (outText === currentQ.output) {
+      const outText = outputResult.stdout.replace(/\r/g, '').trim().toLowerCase()
+      const expectedOutput = currentQ.output.replace(/\r/g, '').trim().toLowerCase()
+      
+      console.log('--- COMPARISON DEBUG ---')
+      console.log('Out:', outText)
+      console.log('Expected:', expectedOutput)
+      console.log('Match:', outText === expectedOutput)
+
+      if (outText === expectedOutput) {
         // Solved!
-        addSolvedChallenge(currentQ.id)
-        toast.success(`Correct! +${currentQ.xp} XP Claimed!`)
-        try {
-          const res = await markChallengeSolved({ challenge_id: currentQ.id, xp_reward: currentQ.xp })
-          setProgress(res.data)
-        } catch (error) {
-          console.error("Failed to save progress", error)
+        const qId = currentQ.id
+        setSessionSolved(prev => [...prev, qId]) // Immediate visual feedback
+        
+        if (!solvedSet.has(String(qId))) {
+          addSolvedChallenge(qId)
+          toast.success(`Correct! +${currentQ.xp} XP Claimed!`)
+          try {
+            const res = await markChallengeSolved({ challenge_id: currentQ.id, xp_reward: currentQ.xp })
+            if (res.data) setProgress(res.data)
+          } catch (error) {
+            console.error("Failed to save progress", error)
+          }
         }
+        updateMascot(editorCode, true)
       } else {
         toast.error('Incorrect output. Try again!')
+        updateMascot(editorCode, false)
       }
+    } else if (outputResult?.error) {
+      updateMascot(editorCode, false)
     }
   }
 
@@ -215,7 +294,12 @@ export default function CodeLab() {
 
       <div className="flex flex-col lg:flex-row gap-6 flex-1 min-h-0">
         {/* Sidebar */}
-        <div className="lg:w-1/3 space-y-4 overflow-y-auto pr-2 custom-scrollbar">
+        <div className="lg:w-1/3 space-y-4 overflow-y-auto pr-2 custom-scrollbar flex flex-col">
+          {/* Mascot Section */}
+          <div className="mb-2">
+            <Mascot {...mascotState} />
+          </div>
+
           <h2 className="text-lg font-bold text-white flex items-center gap-2 mb-4">
             <Target className="w-5 h-5 text-brand-400" /> Practice Challenges
           </h2>
@@ -223,7 +307,7 @@ export default function CodeLab() {
           <div className="space-y-3">
             {currentQuestions.map(q => {
               const isExpanded = expandedQ === q.id
-              const isSolved = solvedQs[q.id]
+              const isSolved = solvedSet.has(String(q.id)) || sessionSolved.includes(q.id)
               return (
                 <div key={q.id} className="glass rounded-xl border border-white/10 overflow-hidden">
                   <button 
