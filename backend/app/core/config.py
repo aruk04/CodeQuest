@@ -13,15 +13,9 @@ class Settings(BaseSettings):
     # Database
     DATABASE_URL: str = "postgresql+asyncpg://codequest:codequest_secret@localhost:5432/codequest"
 
-    # Redis
-    REDIS_URL: str = "redis://localhost:6379"
-
     # Anthropic
     ANTHROPIC_API_KEY: str = ""
     ANTHROPIC_MODEL: str = "claude-3-5-sonnet-20240620"
-
-    # Judge0 (Self-hosted, runs via Docker)
-    JUDGE0_URL: str = "http://localhost:2358"
 
     # JWT
     SECRET_KEY: str = "change-this-secret-key-in-production-32chars!!"
@@ -35,5 +29,12 @@ class Settings(BaseSettings):
         env_file = ".env"
         case_sensitive = True
 
-
 settings = Settings()
+# Debug log to verify the URL being used
+try:
+    url_parts = settings.DATABASE_URL.split("@")
+    masked_url = f"{url_parts[0].split(':')[0]}://***@{url_parts[1]}"
+    print(f"\n[DEBUG] Database Protocol: {settings.DATABASE_URL.split('://')[0]}")
+    print(f"[DEBUG] Using URL: {masked_url}\n")
+except:
+    pass
