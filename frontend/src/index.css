@@ -1,0 +1,207 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Base ─────────────────────────────────────────── */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --color-bg: #0a0f1e;
+  --color-surface: #0f172a;
+  --color-border: rgba(255,255,255,0.08);
+  --color-brand: #22c55e;
+  --color-brand-glow: rgba(34,197,94,0.3);
+  --scrollbar-thumb: #1e293b;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background-color: var(--color-bg);
+  color: #f1f5f9;
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── Scrollbar ────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--color-surface); }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #334155; }
+
+/* ── Selection ────────────────────────────────────── */
+::selection { background: rgba(34,197,94,0.3); color: #fff; }
+
+/* ── Focus Ring ───────────────────────────────────── */
+*:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ── Glass Card ───────────────────────────────────── */
+.glass {
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--color-border);
+}
+
+.glass-hover {
+  transition: all 0.2s ease;
+}
+.glass-hover:hover {
+  background: rgba(30, 41, 59, 0.8);
+  border-color: rgba(255,255,255,0.15);
+  transform: translateY(-2px);
+}
+
+/* ── Shimmer Loading ──────────────────────────────── */
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.0) 0%,
+    rgba(255,255,255,0.06) 50%,
+    rgba(255,255,255,0.0) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s linear infinite;
+}
+
+/* ── XP Bar ───────────────────────────────────────── */
+.xp-bar-fill {
+  background: linear-gradient(90deg, #22c55e, #4ade80, #86efac);
+  background-size: 200% 100%;
+  animation: shimmer 2s linear infinite;
+}
+
+/* ── Neon Glow ────────────────────────────────────── */
+.glow-green  { box-shadow: 0 0 20px rgba(34,197,94,0.4); }
+.glow-purple { box-shadow: 0 0 20px rgba(168,85,247,0.4); }
+.glow-blue   { box-shadow: 0 0 20px rgba(59,130,246,0.4); }
+.glow-gold   { box-shadow: 0 0 20px rgba(245,158,11,0.4); }
+
+.text-glow-green  { text-shadow: 0 0 20px rgba(34,197,94,0.6); }
+.text-glow-purple { text-shadow: 0 0 20px rgba(168,85,247,0.6); }
+
+/* ── Button Base ──────────────────────────────────── */
+.btn {
+  @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-semibold
+         text-sm transition-all duration-200 cursor-pointer select-none;
+}
+.btn:active { transform: scale(0.97); }
+
+.btn-primary {
+  @apply btn bg-brand-500 text-white;
+  box-shadow: 0 0 0 0 rgba(34,197,94,0);
+  transition: all 0.2s;
+}
+.btn-primary:hover {
+  @apply bg-brand-400;
+  box-shadow: 0 0 24px rgba(34,197,94,0.5);
+}
+
+.btn-ghost {
+  @apply btn bg-transparent text-slate-300 border border-white/10;
+}
+.btn-ghost:hover {
+  @apply bg-white/5 text-white border-white/20;
+}
+
+.btn-danger {
+  @apply btn bg-red-500/20 text-red-400 border border-red-500/30;
+}
+.btn-danger:hover {
+  @apply bg-red-500/30 text-red-300;
+}
+
+/* ── Input ────────────────────────────────────────── */
+.input {
+  @apply w-full bg-surface-800 border border-white/10 rounded-xl px-4 py-3
+         text-slate-100 placeholder-slate-500 text-sm
+         transition-all duration-200;
+}
+.input:focus {
+  @apply outline-none border-brand-500;
+  box-shadow: 0 0 0 3px rgba(34,197,94,0.15);
+}
+
+/* ── Badge ────────────────────────────────────────── */
+.badge {
+  @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold;
+}
+
+/* ── Lesson Card States ───────────────────────────── */
+.node-locked   { @apply opacity-40 cursor-not-allowed; }
+.node-unlocked { @apply cursor-pointer; }
+.node-completed {
+  background: linear-gradient(135deg, rgba(34,197,94,0.2), rgba(74,222,128,0.1));
+  border-color: rgba(34,197,94,0.4);
+}
+
+/* ── Code Block ───────────────────────────────────── */
+.prose-dark code:not([class*="language-"]) {
+  @apply bg-surface-700 text-brand-400 px-1.5 py-0.5 rounded font-mono text-sm;
+}
+
+/* ── Progress Ring SVG ────────────────────────────── */
+.progress-ring-circle {
+  transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+}
+
+/* ── Streak Flame ─────────────────────────────────── */
+.streak-flame {
+  filter: drop-shadow(0 0 8px rgba(249,115,22,0.8));
+  animation: fire 1s ease-in-out infinite alternate;
+}
+
+/* ── Road Map Node Connector ──────────────────────── */
+.roadmap-connector {
+  background: linear-gradient(180deg, rgba(34,197,94,0.6) 0%, rgba(34,197,94,0.1) 100%);
+}
+
+/* ── Exercise Correct/Wrong Feedback ─────────────── */
+.feedback-correct {
+  background: linear-gradient(135deg, rgba(34,197,94,0.15), rgba(74,222,128,0.05));
+  border: 1px solid rgba(34,197,94,0.4);
+}
+.feedback-wrong {
+  background: linear-gradient(135deg, rgba(239,68,68,0.15), rgba(248,113,113,0.05));
+  border: 1px solid rgba(239,68,68,0.4);
+}
+
+/* ── Page Transition ──────────────────────────────── */
+.page-enter {
+  animation: slide-up 0.4s ease-out;
+}
+
+/* ── Mesh Background ──────────────────────────────── */
+.bg-mesh {
+  background-image:
+    radial-gradient(at 20% 20%, rgba(34,197,94,0.05) 0px, transparent 50%),
+    radial-gradient(at 80% 0%, rgba(168,85,247,0.07) 0px, transparent 50%),
+    radial-gradient(at 0% 80%, rgba(6,182,212,0.05) 0px, transparent 50%);
+}
+
+/* ── Markdown Prose ───────────────────────────────── */
+.md-content h1, .md-content h2, .md-content h3 {
+  @apply font-bold text-white mt-6 mb-3;
+}
+.md-content h1 { @apply text-2xl; }
+.md-content h2 { @apply text-xl; }
+.md-content h3 { @apply text-lg; }
+.md-content p  { @apply text-slate-300 leading-relaxed mb-4; }
+.md-content ul, .md-content ol { @apply text-slate-300 ml-5 mb-4 space-y-1; }
+.md-content li { @apply list-disc; }
+.md-content pre {
+  @apply bg-surface-800 rounded-xl p-4 overflow-x-auto mb-4;
+}
+.md-content blockquote {
+  @apply border-l-4 border-brand-500 pl-4 text-slate-400 italic;
+}
+.md-content strong { @apply text-white font-semibold; }
+.md-content a { @apply text-brand-400 hover:underline; }
