@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, Reorder } from 'framer-motion'
 import { Layers, AlignJustify, GripHorizontal, Plus, Minus, ArrowRight, Info, Share2, GitBranch, Table, Trash2, Search } from 'lucide-react'
 
 // Basic DSA structures we will visualize
@@ -240,6 +240,61 @@ function ArrayVisualizer() {
     toast.success('Array Sorted!')
   }
 
+  const mergeSort = async () => {
+    setSorting(true)
+    let arr = [...array]
+    
+    const merge = async (l, m, r) => {
+      let n1 = m - l + 1
+      let n2 = r - m
+      let L = new Array(n1)
+      let R = new Array(n2)
+      for (let i = 0; i < n1; i++) L[i] = arr[l + i]
+      for (let j = 0; j < n2; j++) R[j] = arr[m + 1 + j]
+
+      let i = 0, j = 0, k = l
+      while (i < n1 && j < n2) {
+        setComparing([k, m + 1 + j])
+        await sleep(600)
+        if (L[i] <= R[j]) {
+          arr[k] = L[i]
+          i++
+        } else {
+          arr[k] = R[j]
+          j++
+        }
+        setArray([...arr])
+        k++
+        await sleep(400)
+      }
+      while (i < n1) {
+        arr[k] = L[i]
+        i++; k++
+        setArray([...arr])
+        await sleep(400)
+      }
+      while (j < n2) {
+        arr[k] = R[j]
+        j++; k++
+        setArray([...arr])
+        await sleep(400)
+      }
+    }
+
+    const sort = async (l, r) => {
+      if (l >= r) return
+      let m = l + Math.floor((r - l) / 2)
+      await sort(l, m)
+      await sort(m + 1, r)
+      await merge(l, m, r)
+    }
+
+    await sort(0, arr.length - 1)
+    setComparing([])
+    setSorting(false)
+    toast.success('Array Sorted!')
+  }
+
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between mb-8">
@@ -250,7 +305,10 @@ function ArrayVisualizer() {
         <div className="flex gap-2">
           {!sorting && (
             <>
-              <div className="flex bg-surface-900 rounded-lg overflow-hidden border border-white/10 mr-2">
+              <div className="flex bg-surface-900 rounded-lg overflow-hidden border border-white/10 mr-2 group relative">
+                <div className="absolute -top-8 left-0 bg-surface-700 text-[10px] text-white px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-white/10">
+                  Search Value
+                </div>
                 <input 
                   type="number" 
                   placeholder="Val"
@@ -258,7 +316,7 @@ function ArrayVisualizer() {
                   value={searchingValue}
                   onChange={e => setSearchingValue(e.target.value)}
                 />
-                <button onClick={handleSearch} className="p-2 hover:bg-white/5 text-purple-400 transition-colors">
+                <button onClick={handleSearch} className="p-2 hover:bg-white/5 text-purple-400 transition-colors" title="Search value in array">
                   <Search className="w-4 h-4" />
                 </button>
               </div>
@@ -267,6 +325,9 @@ function ArrayVisualizer() {
               </button>
               <button onClick={selectionSort} className="btn-ghost text-xs border border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/10">
                 Selection Sort
+              </button>
+              <button onClick={mergeSort} className="btn-ghost text-xs border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10">
+                Merge Sort
               </button>
               <button onClick={insert} disabled={array.length >= 10} className="btn-primary flex items-center gap-2 text-xs">
                 <Plus className="w-3 h-3" /> Append
@@ -322,7 +383,7 @@ function ArrayVisualizer() {
         <Info className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
         <div className="text-sm text-slate-300">
           <strong className="text-white block mb-1 text-xs uppercase tracking-wider opacity-60">Visual sorting</strong>
-          Average: <code className="text-brand-400">O(N²)</code> | Space: <code className="text-brand-400">O(1)</code>
+          Merge Sort: <code className="text-emerald-400">O(N log N)</code> | Others: <code className="text-brand-400">O(N²)</code>
           <p className="mt-2 text-slate-400">Watch the elements swap in real-time. Highlights indicate comparisons.</p>
         </div>
       </div>
@@ -331,17 +392,31 @@ function ArrayVisualizer() {
 }
 
 function LinkedListVisualizer() {
-  const [nodes, setNodes] = useState([10, 20, 30])
+  const [nodes, setNodes] = useState([
+    { id: 1, val: 10 },
+    { id: 2, val: 20 },
+    { id: 3, val: 30 }
+  ])
   const [counter, setCounter] = useState(40)
 
   const addNode = () => {
-    if (nodes.length >= 6) return
-    setNodes(prev => [...prev, counter])
+    if (nodes.length >= 8) return
+    const newNode = { id: Date.now(), val: counter }
+    setNodes(prev => [...prev, newNode])
     setCounter(c => c + 10)
   }
 
-  const removeNode = (idx) => {
-    setNodes(prev => prev.filter((_, i) => i !== idx))
+  const insertAfter = (idx) => {
+    if (nodes.length >= 8) return
+    const newNode = { id: Date.now(), val: counter }
+    const newNodes = [...nodes]
+    newNodes.splice(idx + 1, 0, newNode)
+    setNodes(newNodes)
+    setCounter(c => c + 10)
+  }
+
+  const removeNode = (id) => {
+    setNodes(prev => prev.filter(n => n.id !== id))
   }
 
   return (
@@ -349,72 +424,90 @@ function LinkedListVisualizer() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h2 className="text-xl font-bold text-white mb-1">Singly Linked List</h2>
-          <p className="text-sm text-slate-400">Nodes connected by pointers.</p>
+          <p className="text-sm text-slate-400">Drag nodes to reorder. Click '+' to insert in middle.</p>
         </div>
-        <button onClick={addNode} disabled={nodes.length >= 6} className="btn-primary flex items-center gap-2">
-          <Plus className="w-4 h-4" /> Add Node
+        <button onClick={addNode} disabled={nodes.length >= 8} className="btn-primary flex items-center gap-2">
+          <Plus className="w-4 h-4" /> Append Node
         </button>
       </div>
 
       <div className="flex-1 flex items-center justify-center py-10 overflow-x-auto custom-scrollbar">
-        <div className="flex items-center gap-0 min-w-max px-8">
-          <AnimatePresence>
+        <Reorder.Group 
+          axis="x" 
+          values={nodes} 
+          onReorder={setNodes}
+          className="flex items-center gap-0 min-w-max px-8"
+        >
+          <AnimatePresence initial={false}>
             {nodes.map((node, i) => (
-              <React.Fragment key={`${node}`}>
-                <motion.div
+              <React.Fragment key={node.id}>
+                <Reorder.Item
+                  value={node}
                   initial={{ opacity: 0, scale: 0.5, x: -20 }}
                   animate={{ opacity: 1, scale: 1, x: 0 }}
                   exit={{ opacity: 0, scale: 0, x: 20 }}
-                  className="relative group"
+                  whileDrag={{ scale: 1.1, cursor: 'grabbing' }}
+                  className="relative group cursor-grab z-10"
                 >
                   <div className="w-16 h-16 bg-gradient-to-br from-teal-500 to-emerald-600 rounded-lg flex flex-col items-center justify-center font-mono font-bold text-white shadow-xl border border-teal-400/30 relative">
-                    {node}
-                    <div className="absolute -bottom-6 text-[10px] text-teal-400/60 font-semibold">
+                    {node.val}
+                    <div className="absolute -bottom-6 text-[10px] text-teal-400/60 font-semibold whitespace-nowrap">
                       {i === 0 ? 'Head' : i === nodes.length - 1 ? 'Tail' : `Node ${i}`}
                     </div>
                     <button 
-                      onClick={() => removeNode(i)}
-                      className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        removeNode(node.id)
+                      }}
+                      className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:scale-110"
                     >
                       <Trash2 className="w-3 h-3 text-white" />
                     </button>
+                    {/* Drag Handle Overlay */}
+                    <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 rounded-lg pointer-events-none flex items-center justify-center">
+                      <div className="w-4 h-6 flex flex-col justify-between opacity-30">
+                        <div className="h-0.5 w-full bg-white rounded-full" />
+                        <div className="h-0.5 w-full bg-white rounded-full" />
+                        <div className="h-0.5 w-full bg-white rounded-full" />
+                      </div>
+                    </div>
                   </div>
-                </motion.div>
+                </Reorder.Item>
                 
                 {i < nodes.length - 1 && (
-                  <motion.div 
-                    initial={{ width: 0 }} 
-                    animate={{ width: 40 }} 
-                    className="h-1 bg-teal-500/30 relative flex items-center justify-center overflow-visible"
-                  >
+                  <div className="h-1 bg-teal-500/30 relative flex items-center justify-center overflow-visible w-12 group/arrow mx-1">
                     <ArrowRight className="w-4 h-4 text-teal-500 absolute -right-2" />
-                  </motion.div>
+                    {/* Insertion Button */}
+                    <button 
+                      onClick={() => insertAfter(i)}
+                      className="absolute z-20 w-5 h-5 bg-teal-500 rounded-full flex items-center justify-center text-white opacity-0 group-hover/arrow:opacity-100 transition-all hover:scale-125 shadow-lg border border-teal-300"
+                      title="Insert node here"
+                    >
+                      <Plus className="w-3 h-3" />
+                    </button>
+                  </div>
                 )}
 
                 {i === nodes.length - 1 && (
-                   <motion.div 
-                   initial={{ width: 0 }} 
-                   animate={{ width: 40 }} 
-                   className="h-1 bg-slate-700 relative flex items-center justify-center"
-                 >
-                   <div className="absolute -right-2 w-2 h-2 rounded-full bg-slate-500" title="Null Pointer" />
-                 </motion.div>
+                   <div className="h-1 bg-slate-700 relative flex items-center justify-center w-10 mx-1">
+                     <div className="absolute -right-2 w-2 h-2 rounded-full bg-slate-500" title="Null Pointer" />
+                   </div>
                 )}
               </React.Fragment>
             ))}
           </AnimatePresence>
-          {nodes.length === 0 && (
-            <div className="text-slate-500 italic text-sm">List is empty. Add a Head node.</div>
-          )}
-        </div>
+        </Reorder.Group>
+        {nodes.length === 0 && (
+          <div className="text-slate-500 italic text-sm">List is empty. Add a Head node.</div>
+        )}
       </div>
 
       <div className="mt-auto bg-surface-700/50 p-4 rounded-xl border border-white/5 flex gap-4 items-start">
         <Share2 className="w-5 h-5 text-teal-400 flex-shrink-0 mt-0.5" />
         <div className="text-sm text-slate-300">
-          <strong className="text-white block mb-1">Complexity:</strong>
-          Insert (Head): <code className="text-teal-400">O(1)</code> | Search: <code className="text-teal-400">O(N)</code>
-          <p className="mt-2 text-slate-400">Linked lists are dynamic and can easily grow in size without reallocation.</p>
+          <strong className="text-white block mb-1">Interactive Features:</strong>
+          <p className="mb-2">Drag nodes to reorder pointers. Use the <span className="text-teal-400 font-bold">+</span> button on arrows to demonstrate middle insertion.</p>
+          Complexity: Insert <code className="text-teal-400">O(1)</code> | Search <code className="text-teal-400">O(N)</code>
         </div>
       </div>
     </div>
