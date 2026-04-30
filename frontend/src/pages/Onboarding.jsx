@@ -5,6 +5,7 @@ import { ArrowRight, ArrowLeft, Zap, Target } from 'lucide-react'
 import { generateRoadmap } from '../api/roadmap'
 import { useAuthStore } from '../store/authStore'
 import { useProgressStore } from '../store/progressStore'
+import GenerationLoader from '../components/GenerationLoader'
 import toast from 'react-hot-toast'
 
 // API helper
@@ -84,6 +85,7 @@ export default function Onboarding() {
 
   return (
     <div className="min-h-screen bg-surface-950 bg-mesh flex flex-col items-center justify-center px-4">
+      <GenerationLoader isOpen={loading} />
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
         <div className="flex items-center justify-center gap-2 mb-4">

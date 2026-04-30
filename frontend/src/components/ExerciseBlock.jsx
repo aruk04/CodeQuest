@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Lightbulb } from 'lucide-react'
 import { submitAnswer } from '../api/lessons'
 import { useProgressStore } from '../store/progressStore'
+import Markdown from './Markdown'
 import toast from 'react-hot-toast'
 
 export default function ExerciseBlock({ exercise, lessonId, onResult, language }) {
@@ -51,8 +52,8 @@ export default function ExerciseBlock({ exercise, lessonId, onResult, language }
       {/* Question */}
       <div className="glass rounded-2xl p-5 border border-white/10">
         <div className="flex items-start justify-between gap-3 mb-4">
-          <p className="text-white font-medium text-base leading-relaxed">{exercise.question}</p>
-          <span className="flex-shrink-0 text-xs bg-accent-purple/20 text-purple-300 px-2.5 py-1 rounded-lg font-semibold capitalize">
+          <Markdown content={exercise.question} className="text-white font-medium text-base leading-relaxed flex-1" />
+          <span className="flex-shrink-0 text-xs bg-accent-purple/20 text-purple-300 px-2.5 py-1 rounded-lg font-semibold capitalize self-start">
             {exercise.type.replace('_', ' ')}
           </span>
         </div>

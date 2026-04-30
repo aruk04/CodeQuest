@@ -5,6 +5,7 @@ import CodeEditor from '../components/CodeEditor'
 import { useProgressStore } from '../store/progressStore'
 import { markChallengeSolved } from '../api/progress'
 import Mascot from '../components/Mascot'
+import Markdown from '../components/Markdown'
 import { getMascotFeedback } from '../api/ai'
 import toast from 'react-hot-toast'
 
@@ -28,96 +29,86 @@ const PRACTICE_QUESTIONS = {
       id: 1, 
       title: 'Two Sum', 
       difficulty: 'Easy',
-      description: 'Return indices of the two numbers such that they add up to target.', 
-      input: 'nums = [2,7,11,15], target = 9', 
-      output: '[0, 1]', 
+      description: 'Given an array of integers `nums` and an integer `target`, return indices of the two numbers such that they add up to `target`.', 
       xp: 50,
-      starterCode: `def twoSum(nums, target):\n    # write your logic here\n    pass\n\n# Test case (Do not modify)\nprint(twoSum([2,7,11,15], 9))\n`
+      testCases: [
+        { input: '[2,7,11,15], 9', output: '[0, 1]' },
+        { input: '[3,2,4], 6', output: '[1, 2]' },
+        { input: '[3,3], 6', output: '[0, 1]' }
+      ],
+      starterCode: `def twoSum(nums, target):\n    # Write your logic here\n    pass\n`
     },
     { 
       id: 2, 
       title: 'Reverse String', 
       difficulty: 'Easy',
       description: 'Write a function that reverses a string.', 
-      input: 's = "hello"', 
-      output: 'olleh', 
       xp: 30,
-      starterCode: `def reverseString(s):\n    # write your logic here\n    pass\n\n# Test case (Do not modify)\nprint(reverseString("hello"))\n`
+      testCases: [
+        { input: '"hello"', output: 'olleh' },
+        { input: '"Hannah"', output: 'hannaH' },
+        { input: '"CodeQuest"', output: 'tseuQedoC' }
+      ],
+      starterCode: `def reverseString(s):\n    # Write your logic here\n    pass\n`
     },
     { 
       id: 3, 
       title: 'FizzBuzz', 
       difficulty: 'Easy',
-      description: 'Return "Fizz" if n is divisible by 3, "Buzz" if by 5, and "FizzBuzz" if both. Else return string of n.', 
-      input: 'n = 15', 
-      output: 'FizzBuzz', 
+      description: 'Return "Fizz" if `n` is divisible by 3, "Buzz" if by 5, and "FizzBuzz" if both. Else return string of `n`.', 
       xp: 20,
-      starterCode: `def fizzBuzz(n):\n    # write your logic here\n    pass\n\n# Test case (Do not modify)\nprint(fizzBuzz(15))\n`
+      testCases: [
+        { input: '15', output: 'FizzBuzz' },
+        { input: '3', output: 'Fizz' },
+        { input: '5', output: 'Buzz' },
+        { input: '7', output: '7' }
+      ],
+      starterCode: `def fizzBuzz(n):\n    # Write your logic here\n    pass\n`
     },
   ],
   intermediate: [
     { 
       id: 4, 
-      title: 'Container With Most Water', 
+      title: 'Valid Parentheses', 
       difficulty: 'Medium',
-      description: 'Find two lines that together with the x-axis form a container, such that the container contains the most water.', 
-      input: 'height = [1,8,6,2,5,4,8,3,7]', 
-      output: '49', 
+      description: 'Given a string containing just the characters `(`, `)`, `{`, `}`, `[` and `]`, determine if the input string is valid.', 
       xp: 80,
-      starterCode: `def maxArea(height):\n    # write your logic here\n    pass\n\n# Test case (Do not modify)\nprint(maxArea([1,8,6,2,5,4,8,3,7]))\n`
+      testCases: [
+        { input: '"()"', output: 'True' },
+        { input: '"()[]{}"', output: 'True' },
+        { input: '"(]"', output: 'False' },
+        { input: '"([)]"', output: 'False' }
+      ],
+      starterCode: `def isValid(s):\n    # Write your logic here\n    pass\n`
     },
     { 
       id: 5, 
-      title: 'Valid Parentheses', 
-      difficulty: 'Medium',
-      description: 'Given a string containing just the characters "(", ")", "{", "}", "[" and "]", determine if the input is valid.', 
-      input: 's = "()[]{}"', 
-      output: 'True', 
-      xp: 60,
-      starterCode: `def isValid(s):\n    # write your logic here\n    pass\n\n# Test case (Do not modify)\nprint(isValid("()[]{}"))\n`
-    },
-    { 
-      id: 6, 
       title: 'Find Minimum in Rotated Array', 
       difficulty: 'Medium',
       description: 'Find the minimum element in a sorted array that has been rotated.', 
-      input: 'nums = [3,4,5,1,2]', 
-      output: '1', 
       xp: 70,
-      starterCode: `def findMin(nums):\n    # write your logic here\n    pass\n\n# Test case (Do not modify)\nprint(findMin([3,4,5,1,2]))\n`
+      testCases: [
+        { input: '[3,4,5,1,2]', output: '1' },
+        { input: '[4,5,6,7,0,1,2]', output: '0' },
+        { input: '[11,13,15,17]', output: '11' }
+      ],
+      starterCode: `def findMin(nums):\n    # Write your logic here\n    pass\n`
     },
   ],
   advanced: [
     { 
       id: 7, 
-      title: 'Trapping Rain Water', 
-      difficulty: 'Hard',
-      description: 'Given an elevation map where the width of each bar is 1, compute how much water it can trap after raining.', 
-      input: 'height = [0,1,0,2,1,0,1,3,2,1,2,1]', 
-      output: '6', 
-      xp: 150,
-      starterCode: `def trap(height):\n    # write your logic here\n    pass\n\n# Test case (Do not modify)\nprint(trap([0,1,0,2,1,0,1,3,2,1,2,1]))\n`
-    },
-    { 
-      id: 8, 
       title: 'Merge K Sorted Lists', 
       difficulty: 'Hard',
-      description: 'Merge k sorted arrays and return it as one sorted array.', 
-      input: 'lists = [[1,4,5],[1,3,4],[2,6]]', 
-      output: '[1, 1, 2, 3, 4, 4, 5, 6]', 
-      xp: 140,
-      starterCode: `def mergeKLists(lists):\n    # write your logic here\n    pass\n\n# Test case (Do not modify)\nprint(mergeKLists([[1,4,5],[1,3,4],[2,6]]))\n`
-    },
-    { 
-      id: 9, 
-      title: 'Median of Two Sorted Arrays', 
-      difficulty: 'Hard',
-      description: 'Given two sorted arrays nums1 and nums2, return the median of the two sorted arrays.', 
-      input: 'nums1 = [1,3], nums2 = [2]', 
-      output: '2.0', 
-      xp: 180,
-      starterCode: `def findMedianSortedArrays(nums1, nums2):\n    # write your logic here\n    pass\n\n# Test case (Do not modify)\nprint(findMedianSortedArrays([1,3], [2]))\n`
-    },
+      description: 'Merge $k$ sorted arrays and return it as one sorted array.', 
+      xp: 150,
+      testCases: [
+        { input: '[[1,4,5],[1,3,4],[2,6]]', output: '[1, 1, 2, 3, 4, 4, 5, 6]' },
+        { input: '[]', output: '[]' },
+        { input: '[[]]', output: '[]' }
+      ],
+      starterCode: `def mergeKLists(lists):\n    # Write your logic here\n    pass\n`
+    }
   ]
 }
 
@@ -128,7 +119,9 @@ export default function CodeLab() {
 
   const [selectedLang, setSelectedLang] = useState(defaultLang)
   const [expandedQ, setExpandedQ] = useState(null)
-  const [sessionSolved, setSessionSolved] = useState([]) // Local cache for instant visual feedback
+  const [sessionSolved, setSessionSolved] = useState([])
+  const [isValidating, setIsValidating] = useState(false)
+  const [testResults, setTestResults] = useState(null) // Array of { input, expected, actual, passed }
   
   // Convert array of solved challenges to a Set of strings for robust checking
   const solvedSet = new Set(solvedChallenges.map(id => String(id)))
@@ -201,9 +194,11 @@ export default function CodeLab() {
     if (expandedQ === qId) {
       setExpandedQ(null)
       setEditorCode(LANG_STARTERS[selectedLang])
+      setTestResults(null)
       setEditorKey(k => k + 1)
     } else {
       setExpandedQ(qId)
+      setTestResults(null)
       const q = currentQuestions.find(x => x.id === qId)
       if (q) {
         setEditorCode(q.starterCode)
@@ -213,44 +208,77 @@ export default function CodeLab() {
     }
   }
 
-  const handleRunComplete = async (outputResult) => {
-    if (!expandedQ) return // Only verify if a question is actively selected
+  const handleValidate = async () => {
+    if (!expandedQ) return
+    const q = currentQuestions.find(x => x.id === expandedQ)
+    if (!q) return
+
+    setIsValidating(true)
+    setTestResults(null)
     
-    const currentQ = currentQuestions.find(x => x.id === expandedQ)
-    if (!currentQ) return
-
-    // Verify output
-    if (outputResult?.stdout) {
-      const outText = outputResult.stdout.replace(/\r/g, '').trim().toLowerCase()
-      const expectedOutput = currentQ.output.replace(/\r/g, '').trim().toLowerCase()
+    try {
+      // 1. Prepare test runner code
+      const funcName = q.starterCode.match(/def (\w+)/)?.[1] || q.title.toLowerCase().replace(/ /g, '')
+      let runnerCode = editorCode + "\n\nprint('---TEST_START---')\n"
       
-      console.log('--- COMPARISON DEBUG ---')
-      console.log('Out:', outText)
-      console.log('Expected:', expectedOutput)
-      console.log('Match:', outText === expectedOutput)
+      q.testCases.forEach((tc, i) => {
+        runnerCode += `print(${funcName}(${tc.input}))\n`
+      })
 
-      if (outText === expectedOutput) {
-        // Solved!
-        const qId = currentQ.id
-        setSessionSolved(prev => [...prev, qId]) // Immediate visual feedback
-        
-        if (!solvedSet.has(String(qId))) {
-          addSolvedChallenge(qId)
-          toast.success(`Correct! +${currentQ.xp} XP Claimed!`)
-          try {
-            const res = await markChallengeSolved({ challenge_id: currentQ.id, xp_reward: currentQ.xp })
-            if (res.data) setProgress(res.data)
-          } catch (error) {
-            console.error("Failed to save progress", error)
-          }
+      // 2. Run code
+      const { runCode } = await import('../api/code')
+      const res = await runCode({ code: runnerCode, language: selectedLang })
+      
+      if (res.data.error) {
+        toast.error("Execution Error: " + res.data.error)
+        setTestResults(q.testCases.map(tc => ({ ...tc, actual: 'ERROR', passed: false })))
+        return
+      }
+
+      // 3. Parse output
+      const stdout = res.data.stdout || ""
+      const parts = stdout.split('---TEST_START---')
+      if (parts.length < 2) throw new Error("Invalid output format")
+      
+      const outputs = parts[1].trim().split('\n').map(line => line.trim())
+      
+      const results = q.testCases.map((tc, i) => {
+        const actual = outputs[i] || "N/A"
+        // Flexible comparison: remove quotes and spaces
+        const normalize = (s) => String(s).replace(/['"]/g, '').replace(/\s/g, '').toLowerCase()
+        const passed = normalize(actual) === normalize(tc.output)
+        return { ...tc, actual, passed }
+      })
+
+      setTestResults(results)
+      const allPassed = results.every(r => r.passed)
+
+      if (allPassed) {
+        setSessionSolved(prev => [...prev, q.id])
+        if (!solvedSet.has(String(q.id))) {
+          addSolvedChallenge(q.id)
+          toast.success(`Success! All ${results.length} test cases passed! +${q.xp} XP`)
+          const resProg = await markChallengeSolved({ challenge_id: q.id, xp_reward: q.xp })
+          if (resProg.data) setProgress(resProg.data)
         }
         updateMascot(editorCode, true)
       } else {
-        toast.error('Incorrect output. Try again!')
+        toast.error(`${results.filter(r => !r.passed).length} test cases failed.`)
         updateMascot(editorCode, false)
       }
-    } else if (outputResult?.error) {
-      updateMascot(editorCode, false)
+    } catch (error) {
+      console.error(error)
+      toast.error("Validation failed. Check your syntax.")
+    } finally {
+      setIsValidating(false)
+    }
+  }
+
+  const handleRunComplete = async (outputResult) => {
+    // When a question is selected, we prefer using handleValidate
+    // but we'll still trigger mascot feedback for general runs.
+    if (expandedQ) {
+      updateMascot(editorCode, false) 
     }
   }
 
@@ -338,17 +366,70 @@ export default function CodeLab() {
                         exit={{ height: 0 }}
                         className="overflow-hidden bg-black/20"
                       >
-                        <div className="p-4 border-t border-white/5 space-y-3">
-                          <p className="text-sm text-slate-300">{q.description}</p>
-                          <div className="bg-surface-900 rounded p-2 text-xs font-mono text-slate-400 border border-white/5">
-                            <span className="text-brand-400">Input:</span> {q.input}
-                            <br />
-                            <span className="text-accent-purple">Expected Output:</span> {q.output}
+                        <div className="p-4 border-t border-white/5 space-y-4">
+                          <Markdown content={q.description} className="text-sm text-slate-300" />
+                          
+                          {/* Test Cases UI */}
+                          <div className="space-y-2">
+                            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center justify-between">
+                              <span>Test Cases</span>
+                              <span>{testResults ? `${testResults.filter(r => r.passed).length}/${q.testCases.length} Passed` : ''}</span>
+                            </div>
+                            
+                            <div className="space-y-1.5">
+                              {(testResults || q.testCases).map((tc, i) => {
+                                const result = testResults?.[i]
+                                return (
+                                  <div key={i} className={`p-2 rounded-lg border text-xs font-mono transition-colors ${
+                                    result ? (result.passed ? 'bg-brand-500/10 border-brand-500/30' : 'bg-red-500/10 border-red-500/30') : 'bg-surface-900 border-white/5'
+                                  }`}>
+                                    <div className="flex items-center justify-between mb-1">
+                                      <span className="text-slate-400">Case {i + 1}</span>
+                                      {result && (
+                                        <span className={result.passed ? 'text-brand-400' : 'text-red-400'}>
+                                          {result.passed ? '✓ Pass' : '✗ Fail'}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2">
+                                      <div>
+                                        <div className="text-[9px] text-slate-500">Input</div>
+                                        <div className="truncate text-slate-300">{tc.input}</div>
+                                      </div>
+                                      <div>
+                                        <div className="text-[9px] text-slate-500">Expected</div>
+                                        <div className="truncate text-slate-300">{tc.output}</div>
+                                      </div>
+                                    </div>
+                                    {result && !result.passed && (
+                                      <div className="mt-1 pt-1 border-t border-white/5">
+                                        <div className="text-[9px] text-red-400/70">Actual Output</div>
+                                        <div className="text-red-300 truncate">{result.actual}</div>
+                                      </div>
+                                    )}
+                                  </div>
+                                )
+                              })}
+                            </div>
                           </div>
                           
-                          <div className="w-full py-2 rounded-lg text-xs font-medium text-center border border-white/5 bg-surface-800 text-slate-400">
-                            {isSolved ? '✅ Challenge Solved!' : '✏️ Write code & click "Run" to verify'}
-                          </div>
+                          <button 
+                            onClick={handleValidate}
+                            disabled={isValidating || isSolved}
+                            className={`w-full py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
+                              isSolved 
+                                ? 'bg-brand-500/20 text-brand-400 border border-brand-500/30 cursor-default' 
+                                : 'bg-brand-500 text-white hover:bg-brand-600 shadow-lg shadow-brand-500/20'
+                            }`}
+                          >
+                            {isValidating ? (
+                              <><span className="animate-spin text-lg">⚙️</span> Validating...</>
+                            ) : isSolved ? (
+                              <><CheckCircle className="w-4 h-4" /> Solved</>
+                            ) : (
+                              'Submit Solution'
+                            )}
+                          </button>
                         </div>
                       </motion.div>
                     )}
